@@ -1,6 +1,4 @@
-# Mina zkApp: Indexed Merkle Tree O1js
-
-This template uses TypeScript.
+# Indexed Merkle Tree
 
 ## How to build
 
@@ -20,7 +18,3 @@ npm run testw # watch mode
 ```sh
 npm run coverage
 ```
-
-## License
-
-[Apache-2.0](LICENSE)
