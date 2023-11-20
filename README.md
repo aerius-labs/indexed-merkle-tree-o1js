@@ -1,5 +1,9 @@
 # Indexed Merkle Tree
 
+Insertion algorithm for Indexed Merkle Tree
+
+Inspired from: https://docs.aztec.network/concepts/advanced/data_structures/indexed_merkle_tree
+
 ## How to build
 
 ```sh
