@@ -10,8 +10,8 @@ import {
 import { MerkleTree } from '../utils/MerkleTreeUtils';
 import {
   IndexedMerkleTreeLeaf,
-  insertIndexedMerkleTreeLeaf,
-} from '../circuits/IndexedMerkleTreeLeaf';
+  insertLeaf,
+} from '../circuits/IndexedMerkleTree';
 
 const IMTInsertionCircuit = ZkProgram({
   name: 'Dummy Circuit',
@@ -23,7 +23,6 @@ const IMTInsertionCircuit = ZkProgram({
       privateInputs: [
         Field,
         IndexedMerkleTreeLeaf,
-        Field,
         Provable.Array(Field, 3),
         Provable.Array(Bool, 3),
         Field,
@@ -37,7 +36,6 @@ const IMTInsertionCircuit = ZkProgram({
       method(
         oldRoot: Field,
         lowLeaf: IndexedMerkleTreeLeaf,
-        lowLeafIndex: Field,
         lowLeafProof: Field[],
         lowLeafProofHelper: Bool[],
         newRoot: Field,
@@ -47,10 +45,9 @@ const IMTInsertionCircuit = ZkProgram({
         newLeafProofHelper: Bool[],
         isNewLeafLargest: Bool
       ) {
-        insertIndexedMerkleTreeLeaf(
+        insertLeaf(
           oldRoot,
           lowLeaf,
-          lowLeafIndex,
           lowLeafProof,
           lowLeafProofHelper,
           newRoot,
@@ -92,7 +89,6 @@ describe('Indexed Merkle Tree Insertion Tests', () => {
       nextValue: Field(0),
       nextIndex: Field(0),
     });
-    const lowLeafIndex = Field(0);
     const [lowLeafProof, lowLeafProofHelper] = indexedMerkleTree.getProof(0);
 
     // compute the iterim state change
@@ -133,7 +129,6 @@ describe('Indexed Merkle Tree Insertion Tests', () => {
     const proof = await IMTInsertionCircuit.insertLeaf(
       oldRoot,
       lowLeaf,
-      lowLeafIndex,
       lowLeafProof,
       lowLeafProofHelper,
       newRoot,
@@ -157,7 +152,6 @@ describe('Indexed Merkle Tree Insertion Tests', () => {
       nextValue: Field(69),
       nextIndex: Field(1),
     });
-    const lowLeafIndex = Field(0);
     const [lowLeafProof, lowLeafProofHelper] = indexedMerkleTree.getProof(0);
 
     // compute the iterim state change
@@ -198,7 +192,6 @@ describe('Indexed Merkle Tree Insertion Tests', () => {
     const proof = await IMTInsertionCircuit.insertLeaf(
       oldRoot,
       lowLeaf,
-      lowLeafIndex,
       lowLeafProof,
       lowLeafProofHelper,
       newRoot,

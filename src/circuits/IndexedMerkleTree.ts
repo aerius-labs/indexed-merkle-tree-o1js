@@ -6,10 +6,9 @@ export class IndexedMerkleTreeLeaf extends Struct({
   nextIndex: Field,
 }) {}
 
-export const insertIndexedMerkleTreeLeaf = (
+export const insertLeaf = (
   oldRoot: Field,
   lowLeaf: IndexedMerkleTreeLeaf,
-  lowLeafIndex: Field,
   lowLeafProof: Field[],
   lowLeafProofHelper: Bool[],
   newRoot: Field,
@@ -19,21 +18,14 @@ export const insertIndexedMerkleTreeLeaf = (
   newLeafProofHelper: Bool[],
   isNewLeafLargest: Bool
 ) => {
-  Provable.if(
-    isNewLeafLargest,
-    lowLeaf.nextValue.equals(Field(0)),
-    lowLeaf.nextValue.greaterThan(newLeaf.value)
-  ).assertEquals(true);
-
-  verifyMerkleProof(
-    Poseidon.hash([lowLeaf.value, lowLeaf.nextValue, lowLeaf.nextIndex]),
-    lowLeafIndex,
+  verifyNonInclusion(
     oldRoot,
+    lowLeaf,
     lowLeafProof,
-    lowLeafProofHelper
-  ).assertTrue();
-
-  newLeaf.value.assertGreaterThan(lowLeaf.value);
+    lowLeafProofHelper,
+    newLeaf.value,
+    isNewLeafLargest
+  );
 
   const newLowLeaf = new IndexedMerkleTreeLeaf({
     value: lowLeaf.value,
@@ -47,14 +39,12 @@ export const insertIndexedMerkleTreeLeaf = (
       newLowLeaf.nextValue,
       newLowLeaf.nextIndex,
     ]),
-    lowLeafIndex,
     lowLeafProof,
     lowLeafProofHelper
   );
 
   verifyMerkleProof(
     Field(0),
-    newLeafIndex,
     interimRoot,
     newLeafProof,
     newLeafProofHelper
@@ -65,15 +55,37 @@ export const insertIndexedMerkleTreeLeaf = (
 
   computeMerkleRoot(
     Poseidon.hash([newLeaf.value, newLeaf.nextValue, newLeaf.nextIndex]),
-    newLeafIndex,
     newLeafProof,
     newLeafProofHelper
   ).assertEquals(newRoot);
 };
 
+export const verifyNonInclusion = (
+  root: Field,
+  lowLeaf: IndexedMerkleTreeLeaf,
+  lowLeafProof: Field[],
+  lowLeafProofHelper: Bool[],
+  newLeafValue: Field,
+  isNewLeafLargest: Bool
+) => {
+  Provable.if(
+    isNewLeafLargest,
+    lowLeaf.nextValue.equals(Field(0)),
+    lowLeaf.nextValue.greaterThan(newLeafValue)
+  ).assertEquals(true);
+
+  verifyMerkleProof(
+    Poseidon.hash([lowLeaf.value, lowLeaf.nextValue, lowLeaf.nextIndex]),
+    root,
+    lowLeafProof,
+    lowLeafProofHelper
+  ).assertTrue();
+
+  newLeafValue.assertGreaterThan(lowLeaf.value);
+};
+
 const verifyMerkleProof = (
   leaf: Field,
-  index: Field,
   root: Field,
   proof: Field[],
   proofHelper: Bool[]
@@ -92,7 +104,6 @@ const verifyMerkleProof = (
 
 const computeMerkleRoot = (
   leaf: Field,
-  index: Field,
   proof: Field[],
   proofHelper: Bool[]
 ) => {
